@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Least Count – Voice Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg1:#1A1A1E; --bg2:#050506; --ink:#F4F4F5; --quiet:#A1A1AA; --line:rgba(255,255,255,0.08); --card:rgba(255,255,255,0.04); --gold:#F5C451; --bad:#FF8A8A; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; background:linear-gradient(180deg,var(--bg1),var(--bg2)) fixed; color:var(--ink); font-family:Inter,system-ui,sans-serif; }
+  main { max-width:520px; margin:0 auto; padding:24px 18px 48px; display:flex; flex-direction:column; gap:18px; }
+  h1 { margin:0; font-family:'Space Grotesk',sans-serif; font-size:28px; letter-spacing:-0.5px; }
+  h2 { margin:0 0 8px; font-size:12px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; color:var(--quiet); }
+  p { margin:0; }
+  .muted { color:var(--quiet); font-size:13px; line-height:1.45; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; }
+  input[type=text] { width:100%; height:46px; padding:0 14px; border-radius:12px; border:1px solid #3F3F46; background:#0E0E11; color:var(--ink); font:inherit; font-size:16px; }
+  .langs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+  .langs button { height:44px; border-radius:12px; border:1px solid #3F3F46; background:transparent; color:var(--ink); font:inherit; font-size:15px; cursor:pointer; }
+  .langs button[aria-checked=true] { background:var(--ink); color:#111113; font-weight:600; border-color:var(--ink); }
+  .micwrap { display:flex; flex-direction:column; align-items:center; gap:12px; padding:10px 0 4px; }
+  .mic { position:relative; width:104px; height:104px; }
+  .ring, .glow { position:absolute; border-radius:999px; background:conic-gradient(from 0deg,#FF4FD8,#8B5CF6,#3B82F6,#22D3EE,#FF8A3D,#FF4FD8); }
+  .ring { inset:0; }
+  .glow { inset:-16px; filter:blur(20px); opacity:0; transition:opacity .3s; }
+  .mic button { position:absolute; inset:3px; border-radius:999px; border:none; background:#0B0B0D; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .mic.on .ring { animation:spin 2.2s linear infinite; }
+  .mic.on .glow { opacity:1; animation:breathe 2.6s ease-in-out infinite; }
+  .mic.on button { inset:5px; background:rgba(11,11,13,0.82); }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @keyframes breathe { 0%{opacity:.55;transform:scale(.92) rotate(0)} 50%{opacity:.95;transform:scale(1.1) rotate(180deg)} 100%{opacity:.55;transform:scale(.92) rotate(360deg)} }
+  .heard { border:1.5px solid transparent; background:linear-gradient(#131317,#131317) padding-box, linear-gradient(90deg,#FF4FD8,#8B5CF6,#3B82F6,#22D3EE) border-box; border-radius:14px; padding:14px 16px; min-height:56px; font-size:17px; }
+  .alts { margin:8px 0 0; padding-left:18px; color:var(--quiet); font-size:13px; }
+  table { width:100%; border-collapse:collapse; font-size:15px; }
+  th { text-align:left; font-size:12px; color:var(--quiet); font-weight:600; letter-spacing:.6px; text-transform:uppercase; padding:6px 0; }
+  td { padding:9px 0; border-top:1px solid var(--line); }
+  td.num { text-align:right; font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:700; }
+  td.miss { color:var(--gold); text-align:right; font-size:13px; font-weight:600; }
+  .row { display:flex; gap:8px; }
+  .row input { flex:1; }
+  .btn { height:46px; padding:0 16px; border-radius:12px; border:1.5px solid #52525B; background:transparent; color:var(--ink); font:inherit; font-size:15px; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .btn.gold { background:var(--gold); border-color:var(--gold); color:#111113; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .chip { display:flex; align-items:center; gap:6px; padding:6px 6px 6px 12px; border-radius:999px; border:1px solid #3F3F46; font-size:14px; }
+  .chip button { width:28px; height:28px; border-radius:999px; border:none; background:transparent; color:var(--quiet); cursor:pointer; font-size:16px; }
+  .warn { color:var(--bad); }
+  .log { font-family:ui-monospace,Menlo,monospace; font-size:12px; color:var(--quiet); white-space:pre-wrap; max-height:220px; overflow:auto; margin-top:8px; }
+  .sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Voice test</h1>
+    <p class="muted">Pick a language, tap the mic, say a round like “Rahul aath, Priya teen”. Then copy the results and send them back.</p>
+  </header>
+
+  <p id="support" class="muted"></p>
+
+  <section class="card">
+    <h2><label for="players">Players (comma separated)</label></h2>
+    <input id="players" type="text" value="Rahul, Priya, Karthik">
+  </section>
+
+  <section>
+    <h2>Voice language</h2>
+    <div class="langs" role="radiogroup" aria-label="Voice language">
+      <button type="button" role="radio" data-lang="en-IN" aria-checked="true">English</button>
+      <button type="button" role="radio" data-lang="hi-IN" aria-checked="false">हिंदी</button>
+      <button type="button" role="radio" data-lang="ta-IN" aria-checked="false">தமிழ்</button>
+    </div>
+  </section>
+
+  <div class="micwrap">
+    <div class="mic" id="mic">
+      <div class="glow" aria-hidden="true"></div>
+      <div class="ring" aria-hidden="true"></div>
+      <button type="button" id="micBtn" aria-label="Start listening">
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
+      </button>
+    </div>
+    <p id="micText" class="muted" aria-live="polite">Tap to speak</p>
+    <div class="row" style="align-items:center; flex-wrap:wrap; justify-content:center">
+      <button class="btn" id="micCheck" type="button">Check microphone</button>
+      <label class="muted" style="display:flex; align-items:center; gap:8px"><input type="checkbox" id="simple"> Simple mode (device language)</label>
+    </div>
+  </div>
+
+  <section>
+    <h2>Heard</h2>
+    <div class="heard" id="heard" aria-live="polite"><span class="muted">Nothing yet</span></div>
+    <ol class="alts" id="alts"></ol>
+  </section>
+
+  <section class="card">
+    <h2>Scores understood</h2>
+    <table>
+      <thead><tr><th>Player</th><th style="text-align:right">This round</th></tr></thead>
+      <tbody id="result"></tbody>
+    </table>
+    <p id="unknown" class="muted" style="margin-top:8px"></p>
+  </section>
+
+  <section class="card">
+    <h2>Teach a word</h2>
+    <p class="muted">If a slang word wasn't understood, add it here, e.g. <b>naaluu = 4</b>. It's saved on this phone.</p>
+    <form id="teach" class="row" style="margin-top:10px">
+      <label class="sr" for="teachWord">Word</label>
+      <input id="teachWord" type="text" placeholder="word" autocomplete="off" autocapitalize="off">
+      <label class="sr" for="teachNum">Number</label>
+      <input id="teachNum" type="text" inputmode="numeric" placeholder="number" style="max-width:96px">
+      <button class="btn" type="submit">Add</button>
+    </form>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="card">
+    <h2>Results to send back</h2>
+    <div class="row">
+      <button class="btn gold" id="copy" type="button">Copy results</button>
+      <button class="btn" id="clear" type="button">Clear</button>
+    </div>
+    <p id="copyMsg" class="muted" style="margin-top:8px" aria-live="polite"></p>
+    <div class="log" id="log"></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  // ---------- number tables ----------
+  const NUM = {};
+  const add = (v, words) => words.forEach(w => { const k = norm(w); if (k && NUM[k] === undefined) NUM[k] = v; });
+
+  // English
+  const en = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+  en.forEach((w, i) => add(i, [w]));
+  const enT = {20:'twenty',30:'thirty',40:'forty',50:'fifty',60:'sixty',70:'seventy',80:'eighty',90:'ninety',100:'hundred'};
+  Object.keys(enT).forEach(k => add(+k, [enT[k]]));
+  add(100, ['one hundred']); add(2, ['to','too']); add(4, ['for']); add(8, ['ate']); add(0, ['nil','nothing']);
+
+  // Hindi 0-100: [devanagari, romanised...]
+  const hi = [
+    ['शून्य','shunya','zero'],['एक','ek'],['दो','do','doh'],['तीन','teen','tin'],['चार','char','chaar'],['पांच','पाँच','paanch','panch'],['छह','छः','छे','chhah','chhe','che'],['सात','saat','sat'],['आठ','aath','aat'],['नौ','nau','no'],['दस','das','dus'],
+    ['ग्यारह','gyarah','gyara'],['बारह','barah','bara'],['तेरह','terah','tera'],['चौदह','chaudah','chauda'],['पंद्रह','पन्द्रह','pandrah','pandra'],['सोलह','solah','sola'],['सत्रह','satrah','satra'],['अठारह','atharah','athara'],['उन्नीस','unnis'],['बीस','bees','bis'],
+    ['इक्कीस','ikkis'],['बाईस','bais'],['तेईस','teis'],['चौबीस','chaubis'],['पच्चीस','pachchis','pachis'],['छब्बीस','chhabbis'],['सत्ताईस','sattais'],['अट्ठाईस','अठाईस','atthais'],['उनतीस','untis'],['तीस','tees','tis'],
+    ['इकतीस','iktis'],['बत्तीस','battis'],['तैंतीस','taintis'],['चौंतीस','chauntis'],['पैंतीस','paintis'],['छत्तीस','chhattis'],['सैंतीस','saintis'],['अड़तीस','adtis'],['उनतालीस','untalis'],['चालीस','chalis'],
+    ['इकतालीस','iktalis'],['बयालीस','bayalis'],['तैंतालीस','taintalis'],['चवालीस','chavalis'],['पैंतालीस','paintalis'],['छियालीस','chhiyalis'],['सैंतालीस','saintalis'],['अड़तालीस','adtalis'],['उनचास','unchas'],['पचास','pachas'],
+    ['इक्यावन','ikyavan'],['बावन','bavan'],['तिरपन','tirpan'],['चौवन','chauvan'],['पचपन','pachpan'],['छप्पन','chhappan'],['सत्तावन','sattavan'],['अट्ठावन','atthavan'],['उनसठ','unsath'],['साठ','saath'],
+    ['इकसठ','iksath'],['बासठ','baasath'],['तिरसठ','tirsath'],['चौंसठ','chaunsath'],['पैंसठ','painsath'],['छियासठ','chhiyasath'],['सड़सठ','sadsath'],['अड़सठ','adsath'],['उनहत्तर','unhattar'],['सत्तर','sattar'],
+    ['इकहत्तर','ikhattar'],['बहत्तर','bahattar'],['तिहत्तर','tihattar'],['चौहत्तर','chauhattar'],['पचहत्तर','pachhattar'],['छिहत्तर','chhihattar'],['सतहत्तर','sathattar'],['अठहत्तर','athhattar'],['उन्यासी','unyasi'],['अस्सी','assi'],
+    ['इक्यासी','ikyasi'],['बयासी','bayasi'],['तिरासी','tirasi'],['चौरासी','chaurasi'],['पचासी','pachasi'],['छियासी','chhiyasi'],['सत्तासी','sattasi'],['अट्ठासी','atthasi'],['नवासी','navasi'],['नब्बे','nabbe'],
+    ['इक्यानवे','ikyanve'],['बानवे','baanve'],['तिरानवे','tiranve'],['चौरानवे','chauranve'],['पचानवे','pachanve'],['छियानवे','chhiyanve'],['सत्तानवे','sattanve'],['अट्ठानवे','atthanve'],['निन्यानवे','ninyanve'],['सौ','sau']
+  ];
+  hi.forEach((words, i) => add(i, words));
+
+  // Tamil: formal + spoken/slang forms, Tamil script + romanised
+  const ta = {
+    0: ['பூஜ்ஜியம்','பூஜ்யம்','poojiyam','zero'],
+    1: ['ஒன்று','ஒண்ணு','ஒன்னு','ondru','onnu','onu'],
+    2: ['இரண்டு','ரெண்டு','இரெண்டு','irandu','rendu','randu'],
+    3: ['மூன்று','மூணு','மூனு','moondru','moonu','munu','moonu'],
+    4: ['நான்கு','நாலு','naangu','naalu','nalu'],
+    5: ['ஐந்து','அஞ்சு','ainthu','aindhu','anju','anchu'],
+    6: ['ஆறு','aaru','aru'],
+    7: ['ஏழு','ezhu','elu','yelu','yezhu'],
+    8: ['எட்டு','ettu','yettu'],
+    9: ['ஒன்பது','onbathu','ombadhu','ombodhu','onbadhu'],
+    10: ['பத்து','pathu','paththu','padhu'],
+    11: ['பதினொன்று','பதினொண்ணு','pathinonnu','padhinonnu'],
+    12: ['பன்னிரண்டு','பன்னெண்டு','pannirandu','pannendu'],
+    13: ['பதின்மூன்று','பதிமூணு','pathimoonu','padhimoonu'],
+    14: ['பதினான்கு','பதினாலு','pathinaalu','padhinaalu'],
+    15: ['பதினைந்து','பதினஞ்சு','pathinanju','padhinanju'],
+    16: ['பதினாறு','pathinaaru','padhinaaru'],
+    17: ['பதினேழு','pathinezhu','padhinezhu'],
+    18: ['பதினெட்டு','pathinettu','padhinettu'],
+    19: ['பத்தொன்பது','paththonbathu','pathonbathu'],
+    20: ['இருபது','irupathu','irubadhu'],
+    30: ['முப்பது','muppathu','muppadhu'],
+    40: ['நாற்பது','naarpathu','narpadhu'],
+    50: ['ஐம்பது','அம்பது','aimbathu','aimbadhu','ambadhu','ambathu'],
+    60: ['அறுபது','arupathu','arubadhu'],
+    70: ['எழுபது','ezhupathu','ezhubadhu'],
+    80: ['எண்பது','enbathu','enbadhu'],
+    90: ['தொண்ணூறு','thonnooru','thonnuru'],
+    100: ['நூறு','nooru','nuru']
+  };
+  Object.keys(ta).forEach(k => add(+k, ta[k]));
+
+  // Tamil compounds: "irupathi anju" as two words is handled by tens+unit joining.
+  // Single-word compounds like இருபத்தஞ்சு: tens stem + merged unit ending.
+  const TA_STEMS = [[20,'இருபத்'],[30,'முப்பத்'],[40,'நாற்பத்'],[50,'ஐம்பத்'],[60,'அறுபத்'],[70,'எழுபத்'],[80,'எண்பத்'],[90,'தொண்ணூற்'],
+                    [20,'irupath'],[20,'irubath'],[30,'muppath'],[40,'naarpath'],[50,'aimbath'],[60,'arupath'],[70,'ezhupath'],[80,'enbath'],[90,'thonnoot'],[90,'thonnut']];
+  const TA_UNIT_ENDS = [[1,['தொன்று','தொண்ணு','தொன்னு','thonnu','thondru','tonnu']],[2,['திரண்டு','திரெண்டு','தி ரெண்டு','thirandu','thirendu','tirendu']],
+    [3,['துமூன்று','திமூணு','துமூணு','thimoonu','thumoonu']],[4,['துநான்கு','திநாலு','துநாலு','thinaalu','thunaalu']],[5,['தைந்து','தஞ்சு','thanju','thainthu']],
+    [6,['தாறு','thaaru']],[7,['தேழு','thezhu']],[8,['தெட்டு','thettu']],[9,['தொன்பது','thonbathu']]];
+
+  // ---------- helpers ----------
+  function norm(s) {
+    return String(s).toLowerCase().normalize('NFC').replace(/[.,!?;:"“”'’()\-]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  function loose(s) { // for romanised fuzzy matching
+    return norm(s).replace(/\s/g, '').replace(/(.)\1+/g, '$1').replace(/w/g, 'v').replace(/z/g, 'l');
+  }
+  const LOOSE_NUM = {};
+  Object.keys(NUM).forEach(k => { if (/^[a-z ]+$/.test(k)) { const l = loose(k); if (LOOSE_NUM[l] === undefined) LOOSE_NUM[l] = NUM[k]; } });
+
+  let custom = {};
+  try { custom = JSON.parse(localStorage.getItem('lc-custom-words') || '{}') || {}; } catch (e) { custom = {}; }
+  function saveCustom() { try { localStorage.setItem('lc-custom-words', JSON.stringify(custom)); } catch (e) {} }
+
+  function wordToNum(tok) {
+    const t = norm(tok);
+    if (/^\d+$/.test(t)) return parseInt(t, 10);
+    if (custom[t] !== undefined) return custom[t];
+    if (NUM[t] !== undefined) return NUM[t];
+    const l = loose(t);
+    for (const k of Object.keys(custom)) if (loose(k) === l) return custom[k];
+    if (LOOSE_NUM[l] !== undefined) return LOOSE_NUM[l];
+    for (const [tens, stem] of TA_STEMS) {
+      if (t.startsWith(stem) && t.length > stem.length) {
+        const rest = t.slice(stem.length);
+        for (const [u, ends] of TA_UNIT_ENDS) if (ends.some(e => rest === e || rest.endsWith(e))) return tens + u;
+      }
+    }
+    return null;
+  }
+
+  // rough transliteration so "राहुल" / "ராகுல்" can match "Rahul"
+  const DEV_C = {'क':'k','ख':'kh','ग':'g','घ':'gh','ङ':'n','च':'ch','छ':'chh','ज':'j','झ':'jh','ञ':'n','ट':'t','ठ':'th','ड':'d','ढ':'dh','ण':'n','त':'t','थ':'th','द':'d','ध':'dh','न':'n','प':'p','फ':'ph','ब':'b','भ':'bh','म':'m','य':'y','र':'r','ल':'l','व':'v','श':'sh','ष':'sh','स':'s','ह':'h','ळ':'l'};
+  const DEV_V = {'अ':'a','आ':'a','इ':'i','ई':'i','उ':'u','ऊ':'u','ए':'e','ऐ':'ai','ओ':'o','औ':'au','ऋ':'ri'};
+  const DEV_M = {'ा':'a','ि':'i','ी':'i','ु':'u','ू':'u','े':'e','ै':'ai','ो':'o','ौ':'au','ृ':'ri','ं':'n','ँ':'n','ः':'h'};
+  const TA_C = {'க':'k','ங':'n','ச':'s','ஞ':'n','ட':'d','ண':'n','த':'th','ந':'n','ப':'p','ம':'m','ய':'y','ர':'r','ல':'l','வ':'v','ழ':'zh','ள':'l','ற':'r','ன':'n','ஜ':'j','ஷ':'sh','ஸ':'s','ஹ':'h'};
+  const TA_V = {'அ':'a','ஆ':'a','இ':'i','ஈ':'i','உ':'u','ஊ':'u','எ':'e','ஏ':'e','ஐ':'ai','ஒ':'o','ஓ':'o','ஔ':'au'};
+  const TA_M = {'ா':'a','ி':'i','ீ':'i','ு':'u','ூ':'u','ெ':'e','ே':'e','ை':'ai','ொ':'o','ோ':'o','ௌ':'au'};
+  function translit(word) {
+    let out = '', pend = false;
+    for (const ch of word) {
+      if (ch === '़') continue; // nukta
+      const c = DEV_C[ch] || TA_C[ch];
+      if (c) { if (pend) out += 'a'; out += c; pend = true; continue; }
+      const m = DEV_M[ch] || TA_M[ch];
+      if (m) { out += m; pend = false; continue; }
+      if (ch === '्' || ch === '்') { pend = false; continue; }
+      const v = DEV_V[ch] || TA_V[ch];
+      if (v) { if (pend) out += 'a'; out += v; pend = false; continue; }
+      if (pend) { out += 'a'; pend = false; }
+      out += ch;
+    }
+    return out; // trailing inherent 'a' dropped on purpose
+  }
+  function lev(a, b) {
+    const m = a.length, n = b.length; if (!m) return n; if (!n) return m;
+    let prev = Array.from({length: n + 1}, (_, j) => j);
+    for (let i = 1; i <= m; i++) {
+      const cur = [i];
+      for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = cur;
+    }
+    return prev[n];
+  }
+  function matchPlayer(tok, players) {
+    const t = loose(translit(norm(tok)).replace(/h/g, ''));
+    if (t.length < 2) return null;
+    let best = null, bestScore = 0;
+    for (const p of players) {
+      const k = loose(p.replace(/h/gi, ''));
+      const score = 1 - lev(t, k) / Math.max(t.length, k.length);
+      if (score > bestScore) { bestScore = score; best = p; }
+    }
+    return bestScore >= 0.6 ? best : null;
+  }
+
+  // ---------- parser ----------
+  function parse(text, players) {
+    const toks = norm(text).split(' ').filter(Boolean);
+    const scores = {}; const unknown = [];
+    let current = null;
+    for (let i = 0; i < toks.length; i++) {
+      let tok = toks[i];
+      // allow "Rahul8" stuck together
+      const stuck = tok.match(/^(\D+)(\d+)$/);
+      if (stuck) { toks.splice(i, 1, stuck[1], stuck[2]); tok = toks[i]; }
+      let n = wordToNum(tok);
+      if (n !== null && i + 1 < toks.length) { // two-word numbers
+        const two = wordToNum(tok + ' ' + toks[i + 1]);
+        if (two !== null) { n = two; i++; }
+        else if (n >= 20 && n % 10 === 0 && n < 100) {
+          const u = wordToNum(toks[i + 1]);
+          if (u !== null && u > 0 && u < 10) { n += u; i++; }
+        }
+      }
+      if (n !== null) {
+        if (current) { scores[current] = n; current = null; } else unknown.push(tok);
+        continue;
+      }
+      const p = matchPlayer(tok, players);
+      if (p) { current = p; continue; }
+      unknown.push(tok);
+    }
+    return { scores, unknown };
+  }
+
+  // ---------- UI ----------
+  const $ = id => document.getElementById(id);
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const logLines = [];
+  let lang = 'en-IN', rec = null, listening = false, lastFinal = '';
+
+  const ua = navigator.userAgent;
+  const device = /iPhone|iPad/.test(ua) ? 'iPhone/iPad' : /Android/.test(ua) ? 'Android' : 'Desktop';
+  const browser = /CriOS/.test(ua) ? 'Chrome (iOS)' : /Chrome/.test(ua) ? 'Chrome' : /Safari/.test(ua) ? 'Safari' : 'Other';
+  $('support').innerHTML = SR ? `Voice supported on this browser · ${device} · ${browser}` : `<span class="warn">This browser has no speech recognition. Try Safari on iPhone or Chrome on Android.</span>`;
+  if (!SR) $('micBtn').disabled = true;
+
+  function players() { return $('players').value.split(',').map(s => s.trim()).filter(Boolean); }
+
+  document.querySelectorAll('.langs button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.langs button').forEach(x => x.setAttribute('aria-checked', 'false'));
+    b.setAttribute('aria-checked', 'true'); lang = b.dataset.lang;
+  }));
+
+  function setListening(on) {
+    listening = on;
+    $('mic').classList.toggle('on', on);
+    $('micBtn').setAttribute('aria-label', on ? 'Stop listening' : 'Start listening');
+    $('micText').textContent = on ? 'Listening… tap to stop' : 'Tap to speak';
+  }
+
+  function show(text, alts) {
+    $('heard').textContent = text || '…';
+    $('alts').innerHTML = '';
+    (alts || []).slice(1).forEach(a => { const li = document.createElement('li'); li.textContent = a; $('alts').appendChild(li); });
+    const ps = players(); const { scores, unknown } = parse(text, ps);
+    $('result').innerHTML = '';
+    ps.forEach(p => {
+      const tr = document.createElement('tr');
+      const has = scores[p] !== undefined;
+      tr.innerHTML = `<td></td><td class="${has ? 'num' : 'miss'}"></td>`;
+      tr.children[0].textContent = p;
+      tr.children[1].textContent = has ? '+' + scores[p] : 'not heard';
+      $('result').appendChild(tr);
+    });
+    $('unknown').textContent = unknown.length ? 'Words not understood: ' + unknown.join(', ') : '';
+    return { scores, unknown };
+  }
+
+  const t0 = { v: 0 };
+  function trace(msg) { logLines.push(`[${lang} +${Date.now() - t0.v}ms] ${msg}`); renderLog(); }
+
+  $('micCheck').addEventListener('click', async () => {
+    t0.v = Date.now();
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { trace('mic check: getUserMedia not available'); $('micText').textContent = 'Microphone API not available'; return; }
+    try {
+      const st = await navigator.mediaDevices.getUserMedia({ audio: true });
+      st.getTracks().forEach(t => t.stop());
+      trace('mic check: microphone OK'); $('micText').textContent = 'Microphone works';
+    } catch (err) { trace('mic check: FAILED ' + err.name); $('micText').textContent = 'Microphone blocked: ' + err.name; }
+  });
+
+  $('micBtn').addEventListener('click', () => {
+    if (!SR) return;
+    if (listening && rec) { trace('tap: stop'); rec.stop(); return; }
+    const simple = $('simple').checked;
+    rec = new SR();
+    if (!simple) rec.lang = lang;
+    rec.interimResults = !simple; rec.continuous = false; rec.maxAlternatives = simple ? 1 : 5;
+    lastFinal = ''; let alts = []; let gotAny = false;
+    $('heard').innerHTML = '<span class="muted">Listening…</span>';
+    $('alts').innerHTML = ''; $('result').innerHTML = ''; $('unknown').textContent = '';
+    t0.v = Date.now();
+    trace('tap: start' + (simple ? ' (simple mode)' : ''));
+    ['start','audiostart','soundstart','speechstart','speechend','soundend','audioend','nomatch'].forEach(n => rec.addEventListener(n, () => trace('event: ' + n)));
+    rec.onresult = e => {
+      gotAny = true;
+      let txt = '';
+      for (let i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript + ' ';
+      const last = e.results[e.results.length - 1];
+      if (last.isFinal) { alts = Array.from(last).map(a => a.transcript); lastFinal = txt.trim(); }
+      show(txt.trim(), last.isFinal ? alts : []);
+    };
+    rec.onerror = e => { $('micText').textContent = 'Error: ' + e.error + (e.error === 'not-allowed' ? ' (allow microphone & speech recognition)' : ''); trace('ERROR ' + e.error + (e.message ? ' - ' + e.message : '')); $('heard').innerHTML = '<span class="warn">Error: ' + e.error + ' (' + (simple ? 'device language' : lang) + ')</span>'; };
+    rec.onend = () => {
+      trace('event: end');
+      setListening(false);
+      if (!gotAny && $('heard').textContent === 'Listening…') $('heard').innerHTML = '<span class="warn">Nothing heard in ' + (simple ? 'device language' : lang) + '. Try again, or tap Copy results.</span>';
+      if (lastFinal) {
+        const r = show(lastFinal, alts);
+        const parsed = players().map(p => `${p}=${r.scores[p] !== undefined ? r.scores[p] : '?'}`).join(' ');
+        logLines.push(`[${lang}] heard: "${lastFinal}"${alts.length > 1 ? ' | alts: ' + alts.slice(1).join(' / ') : ''}\n   -> ${parsed}${r.unknown.length ? ' | unknown: ' + r.unknown.join(', ') : ''}`);
+        renderLog();
+      }
+    };
+    try { rec.start(); setListening(true); } catch (err) { $('micText').textContent = 'Could not start: ' + err.message; }
+  });
+
+  function renderLog() { $('log').textContent = logLines.join('\n'); }
+  $('copy').addEventListener('click', async () => {
+    const text = `Voice test · ${device} · ${browser}\nplayers: ${players().join(', ')}\ncustom words: ${JSON.stringify(custom)}\n\n${logLines.join('\n')}`;
+    try { await navigator.clipboard.writeText(text); $('copyMsg').textContent = 'Copied. Paste it in the chat.'; }
+    catch (e) { $('copyMsg').textContent = 'Copy blocked. Select the log below and copy it by hand.'; }
+  });
+  $('clear').addEventListener('click', () => { logLines.length = 0; renderLog(); $('copyMsg').textContent = ''; });
+
+  function renderChips() {
+    $('chips').innerHTML = '';
+    Object.keys(custom).forEach(w => {
+      const c = document.createElement('span'); c.className = 'chip';
+      const label = document.createElement('span'); label.textContent = `${w} = ${custom[w]}`;
+      const x = document.createElement('button'); x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', 'Remove ' + w);
+      x.addEventListener('click', () => { delete custom[w]; saveCustom(); renderChips(); });
+      c.append(label, x); $('chips').appendChild(c);
+    });
+  }
+  $('teach').addEventListener('submit', e => {
+    e.preventDefault();
+    const w = norm($('teachWord').value), n = parseInt($('teachNum').value, 10);
+    if (!w || isNaN(n)) return;
+    custom[w] = n; saveCustom(); renderChips();
+    $('teachWord').value = ''; $('teachNum').value = '';
+    if (lastFinal) show(lastFinal, []);
+  });
+  renderChips();
+})();
+</script>
+</body>
+</html>
