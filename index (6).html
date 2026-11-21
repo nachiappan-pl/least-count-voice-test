@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050506">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Least Count">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Least Count</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg1:#1A1A1E; --bg2:#050506; --ink:#F4F4F5; --quiet:#A1A1AA; --line:rgba(255,255,255,0.08); --card:rgba(255,255,255,0.04); --gold:#F5C451; --bad:#FF8A8A; --edge:#52525B; --sheet:#141417; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  [hidden] { display: none !important; }
+  html { background: #050506; }
+  body { margin: 0; min-height: 100vh; min-height: 100dvh; background: linear-gradient(180deg, var(--bg1), var(--bg2)) fixed; color: var(--ink); font-family: Inter, system-ui, -apple-system, sans-serif; }
+  h1, h2, p, ul { margin: 0; padding: 0; }
+  ul { list-style: none; }
+  .view { max-width: 480px; margin: 0 auto; min-height: 100vh; min-height: 100dvh; padding: calc(env(safe-area-inset-top) + 20px) 20px calc(env(safe-area-inset-bottom) + 20px); display: flex; flex-direction: column; gap: 16px; }
+  .grow { flex-grow: 1; }
+  .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+  h1 { font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
+  .title { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
+  .muted { color: var(--quiet); font-size: 13px; line-height: 1.45; }
+  .warn { color: var(--bad); font-size: 13px; }
+  .label { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--quiet); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  button { font: inherit; color: inherit; }
+  .btn { height: 52px; padding: 0 18px; border-radius: 16px; border: 1.5px solid var(--edge); background: transparent; color: var(--ink); font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn.gold { background: var(--gold); border-color: var(--gold); color: #111113; }
+  .btn.small { height: 40px; border-radius: 12px; font-size: 15px; }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+  .link { background: none; border: none; color: var(--quiet); font-size: 13px; padding: 10px 12px; min-height: 44px; cursor: pointer; }
+  .link:hover { color: var(--ink); }
+  .center { align-self: center; }
+  .pills { display: flex; gap: 8px; align-items: center; }
+  .pill { padding: 8px 12px; border: 1px solid #3F3F46; border-radius: 999px; background: transparent; font-size: 13px; font-weight: 600; min-height: 36px; }
+  .pill.gold { color: var(--gold); }
+  button.pill { cursor: pointer; }
+  /* setup */
+  .stepper { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .round-btn { width: 48px; height: 48px; border-radius: 999px; border: 1.5px solid var(--edge); background: transparent; font-size: 24px; cursor: pointer; flex: none; }
+  .round-btn.gold { background: var(--gold); border-color: var(--gold); color: #111113; font-weight: 600; }
+  .stepper-mid { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+  .stepper-mid input { width: 120px; text-align: center; background: transparent; border: none; color: var(--gold); font-family: 'Space Grotesk', sans-serif; font-size: 40px; font-weight: 700; outline: none; padding: 0; -moz-appearance: textfield; }
+  .stepper-mid input::-webkit-outer-spin-button, .stepper-mid input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .prow { display: flex; justify-content: space-between; align-items: center; min-height: 48px; padding: 0 6px 0 16px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); font-size: 16px; font-weight: 500; }
+  .x { width: 44px; height: 44px; border: none; background: transparent; color: var(--quiet); font-size: 22px; cursor: pointer; border-radius: 999px; }
+  .add-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 4px 6px 4px 16px; border-radius: 12px; border: 1.5px dashed var(--edge); }
+  .add-row .plus { color: var(--gold); font-size: 20px; font-weight: 600; }
+  .add-row input { flex: 1; min-width: 0; height: 40px; border: none; background: transparent; color: var(--ink); font: inherit; font-size: 16px; outline: none; }
+  .langs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .langs button { height: 44px; border-radius: 12px; border: 1px solid #3F3F46; background: transparent; font-size: 15px; cursor: pointer; }
+  .langs button[aria-checked=true] { background: var(--ink); color: #111113; font-weight: 600; border-color: var(--ink); }
+  /* board */
+  .cols { display: flex; justify-content: space-between; padding: 0 4px; }
+  .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px 10px 16px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); gap: 12px; }
+  .info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .pname { font-size: 17px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+  .note { font-size: 12px; color: var(--quiet); }
+  .tag { align-self: flex-start; padding: 2px 8px; border-radius: 6px; background: rgba(255,107,107,0.16); font-size: 11px; font-weight: 700; letter-spacing: 0.8px; color: var(--bad); }
+  .score { min-width: 64px; height: 48px; padding: 0 10px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--edge); border-radius: 12px; font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; flex: none; }
+  .row.busted .pname { color: #71717A; text-decoration: line-through; }
+  .row.busted .score { border-color: rgba(255,107,107,0.5); color: var(--bad); }
+  .win { padding: 16px; border-radius: 16px; border: 1.5px solid var(--gold); background: rgba(245,196,81,0.08); display: flex; flex-direction: column; gap: 4px; text-align: center; }
+  .win strong { font-family: 'Space Grotesk', sans-serif; font-size: 24px; }
+  .heard { border: 1.5px solid transparent; background: linear-gradient(#131317, #131317) padding-box, linear-gradient(90deg, #FF4FD8, #8B5CF6, #3B82F6, #22D3EE) border-box; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; min-height: 56px; }
+  .heard .tiny { font-size: 12px; font-weight: 600; color: #C4B5FD; }
+  .controls { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 8px; }
+  .ctl { display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 13px; color: #D4D4D8; }
+  .mic { position: relative; width: 96px; height: 96px; }
+  .ring, .glow { position: absolute; border-radius: 999px; background: conic-gradient(from 0deg, #FF4FD8, #8B5CF6, #3B82F6, #22D3EE, #FF8A3D, #FF4FD8); }
+  .ring { inset: 0; }
+  .glow { inset: -16px; filter: blur(20px); opacity: 0; }
+  .mic button { position: absolute; inset: 3px; border-radius: 999px; border: none; background: #0B0B0D; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .mic.on .ring { animation: spin 2.2s linear infinite; }
+  .mic.on .glow { opacity: 1; animation: breathe 2.6s ease-in-out infinite; }
+  .mic.on button { inset: 5px; background: rgba(11,11,13,0.82); }
+  .mic.off { opacity: 0.4; }
+  .undo { width: 60px; height: 60px; border-radius: 999px; border: 1.5px solid var(--edge); background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-bottom: 0; }
+  .undo:disabled { opacity: 0.4; cursor: default; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes breathe { 0% { opacity: .55; transform: scale(.92) rotate(0deg); } 50% { opacity: .95; transform: scale(1.1) rotate(180deg); } 100% { opacity: .55; transform: scale(.92) rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .mic.on .ring, .mic.on .glow { animation: none; } }
+  .foot { display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; }
+  /* dialogs */
+  dialog { border: none; padding: 0; background: transparent; color: var(--ink); width: 100%; max-width: 480px; margin: auto auto 0; max-height: 94vh; max-height: 94dvh; overflow: visible; }
+  dialog::backdrop { background: rgba(0,0,0,0.65); }
+  .sheet { background: var(--sheet); border: 1px solid var(--line); border-radius: 22px 22px 0 0; padding: 20px 20px calc(env(safe-area-inset-bottom) + 20px); display: flex; flex-direction: column; gap: 14px; max-height: 94vh; max-height: 94dvh; overflow: auto; }
+  .cols3 { display: grid; grid-template-columns: minmax(0, 1fr) 76px 56px; gap: 12px; padding: 0 4px; }
+  .crow { display: grid; grid-template-columns: minmax(0, 1fr) 76px 56px; gap: 12px; align-items: center; padding: 10px 12px 10px 16px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); }
+  .crow.missing { background: rgba(245,196,81,0.08); border-color: rgba(245,196,81,0.45); }
+  .crow.missing .note { color: var(--gold); font-weight: 600; }
+  .crow input { width: 76px; height: 48px; border-radius: 12px; border: 1.5px solid var(--edge); background: transparent; color: var(--ink); text-align: center; font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; outline: none; }
+  .crow.missing input { border: 1.5px dashed var(--gold); }
+  .crow input:focus { border-color: var(--gold); }
+  .crow.guess { border-color: rgba(196,181,253,0.55); background: rgba(139,92,246,0.08); }
+  .crow.guess .note { color: #C4B5FD; font-weight: 600; }
+  .crow.guess input { border: 1.5px dashed #C4B5FD; }
+  .ctotal { text-align: right; font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; }
+  .ctotal.over { color: var(--bad); }
+  .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; border: 1px solid #3F3F46; background: transparent; font-size: 14px; cursor: pointer; }
+  .chip.static { cursor: default; padding-right: 4px; }
+  .chip.static button { width: 28px; height: 28px; border: none; background: transparent; color: var(--quiet); cursor: pointer; font-size: 16px; border-radius: 999px; }
+  .form-row { display: flex; gap: 8px; }
+  .form-row input { flex: 1; min-width: 0; height: 46px; padding: 0 14px; border-radius: 12px; border: 1px solid #3F3F46; background: #0E0E11; color: var(--ink); font: inherit; font-size: 16px; }
+  .form-row input.num { max-width: 96px; flex: none; }
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { padding: 8px 10px; text-align: center; white-space: nowrap; border-bottom: 1px solid var(--line); }
+  th { font-size: 12px; color: var(--quiet); font-weight: 600; }
+  th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: var(--sheet); font-weight: 600; }
+  td input { width: 52px; height: 36px; text-align: center; border-radius: 8px; border: 1px solid #3F3F46; background: transparent; color: var(--ink); font: inherit; font-size: 15px; }
+  td.dash { color: #52525B; }
+  td.tot { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; }
+  td.tot.over { color: var(--bad); }
+  #toast:not(:popover-open) { display: none; }
+  #toast { margin: 0; inset: auto; color: var(--ink); position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 18px); transform: translateX(-50%); max-width: min(440px, calc(100vw - 32px)); background: #26262B; border: 1px solid #3F3F46; border-radius: 14px; padding: 12px 16px; font-size: 14px; display: flex; gap: 14px; align-items: center; z-index: 10; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+  #toast button { background: none; border: none; color: var(--gold); font-weight: 600; font-size: 14px; cursor: pointer; padding: 4px; }
+  dialog[open] ~ #toast { z-index: 1000; }
+</style>
+</head>
+<body>
+
+<section id="viewSetup" class="view" hidden>
+  <header class="head">
+    <h1>New game</h1>
+    <button type="button" class="link" id="backToGame" hidden>Back to game</button>
+  </header>
+
+  <section class="stack">
+    <h2 class="label">Max score</h2>
+    <div class="stepper card">
+      <button type="button" class="round-btn" id="limDown" aria-label="Decrease max score by 10">&minus;</button>
+      <div class="stepper-mid">
+        <label class="sr" for="limitInput">Max score</label>
+        <input id="limitInput" type="number" inputmode="numeric" min="10" max="9999" value="100">
+        <span class="muted">Cross this and you're busted</span>
+      </div>
+      <button type="button" class="round-btn gold" id="limUp" aria-label="Increase max score by 10">+</button>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="label" id="playersLabel" style="margin-bottom:8px">Players</h2>
+    <ul id="playerList" class="list"></ul>
+    <form id="addForm" class="add-row">
+      <span class="plus" aria-hidden="true">+</span>
+      <label class="sr" for="nameInput">Add player name</label>
+      <input id="nameInput" type="text" maxlength="20" autocomplete="off" autocapitalize="words" placeholder="Add player name" enterkeyhint="done">
+      <button type="submit" class="btn small">Add</button>
+    </form>
+    <p id="setupMsg" class="muted" role="status" style="margin-top:8px"></p>
+  </section>
+
+  <section class="stack">
+    <h2 class="label">Voice language</h2>
+    <div class="langs" role="radiogroup" aria-label="Voice language">
+      <button type="button" role="radio" data-lang="en-IN" aria-checked="true">English</button>
+      <button type="button" role="radio" data-lang="hi-IN" aria-checked="false">हिंदी</button>
+      <button type="button" role="radio" data-lang="ta-IN" aria-checked="false">தமிழ்</button>
+    </div>
+    <p id="langNote" class="muted"></p>
+  </section>
+
+  <div class="grow"></div>
+  <p id="installTip" class="muted" hidden>Tip: tap Share, then Add to Home Screen, to use this like an app.</p>
+  <button type="button" class="btn gold" id="startBtn">Start game</button>
+</section>
+
+<section id="viewBoard" class="view" hidden>
+  <header class="head">
+    <div>
+      <p class="muted" id="roundLabel">Round 1</p>
+      <h1>Scoreboard</h1>
+    </div>
+    <div class="pills">
+      <span class="pill gold" id="limitPill">Limit 100</span>
+      <button type="button" class="pill" id="langPill" aria-label="Change voice language">EN</button>
+    </div>
+  </header>
+
+  <div class="cols"><span class="label">Player</span><span class="label">Score</span></div>
+  <ul id="boardList" class="list"></ul>
+  <div id="winBox" class="win" hidden></div>
+
+  <div class="grow"></div>
+
+  <div id="liveBox" class="heard" hidden aria-live="polite">
+    <span class="tiny" id="liveLabel">Starting mic…</span>
+    <span id="liveText"></span>
+  </div>
+
+  <div class="controls">
+    <div class="ctl">
+      <div class="mic" id="mic">
+        <div class="glow" aria-hidden="true"></div>
+        <div class="ring" aria-hidden="true"></div>
+        <button type="button" id="micBtn" aria-label="Start speaking scores">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
+        </button>
+      </div>
+      <span id="micText">Tap to speak</span>
+    </div>
+    <div class="ctl">
+      <button type="button" class="undo" id="undoBtn" aria-label="Undo last round">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+      </button>
+      <span>Undo</span>
+    </div>
+  </div>
+  <button type="button" class="link center" id="typeBtn">Type scores instead</button>
+  <nav class="foot" aria-label="More">
+    <button type="button" class="link" id="historyBtn">History</button>
+    <button type="button" class="link" id="teachBtn">Teach a word</button>
+    <button type="button" class="link" id="newBtn">New game</button>
+    <button type="button" class="link" id="logBtn">Voice log</button>
+  </nav>
+</section>
+
+<dialog id="dlgConfirm" aria-labelledby="cfTitle">
+  <div class="sheet">
+    <header class="head">
+      <div><p class="muted" id="cfRound">Round 1</p><h2 class="title" id="cfTitle">Check the scores</h2></div>
+      <button type="button" class="x" id="cfClose" aria-label="Close">&times;</button>
+    </header>
+    <div id="cfHeard" class="card stack" hidden style="gap:4px"><span class="label">Heard</span><span id="cfHeardText"></span></div>
+    <div id="cfUnknown" class="chips" hidden></div>
+    <div class="cols3"><span class="label">Player</span><span class="label" style="text-align:center">This round</span><span class="label" style="text-align:right">Total</span></div>
+    <ul id="cfList" class="list"></ul>
+    <p id="cfMsg" class="warn" role="alert" hidden></p>
+    <p id="cfStatus" class="muted" role="status" aria-live="polite" hidden></p>
+    <button type="button" class="link center" id="cfZero">Set empty scores to 0</button>
+    <div class="two">
+      <button type="button" class="btn" id="cfSpeak">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
+        <span id="cfSpeakText">Speak again</span>
+      </button>
+      <button type="button" class="btn gold" id="cfAdd">Add round</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="dlgHistory" aria-labelledby="hsTitle">
+  <div class="sheet">
+    <header class="head">
+      <h2 class="title" id="hsTitle">Rounds</h2>
+      <button type="button" class="x" id="hsClose" aria-label="Close">&times;</button>
+    </header>
+    <p class="muted">Tap a score to correct it. Totals and busted players update straight away.</p>
+    <div class="scroll" id="hsWrap"></div>
+  </div>
+</dialog>
+
+<dialog id="dlgTeach" aria-labelledby="thTitle">
+  <div class="sheet">
+    <header class="head">
+      <h2 class="title" id="thTitle">Teach a word</h2>
+      <button type="button" class="x" id="thClose" aria-label="Close">&times;</button>
+    </header>
+    <p class="muted">If a number word isn't understood, add it here, for example <b>naaluu = 4</b>. It is saved on this phone.</p>
+    <form id="thForm" class="form-row">
+      <label class="sr" for="thWord">Word</label>
+      <input id="thWord" type="text" placeholder="word" autocomplete="off" autocapitalize="off">
+      <label class="sr" for="thNum">Number</label>
+      <input id="thNum" class="num" type="text" inputmode="numeric" placeholder="number">
+      <button type="submit" class="btn small">Add</button>
+    </form>
+    <div class="chips" id="thChips"></div>
+  </div>
+</dialog>
+
+<dialog id="dlgNew" aria-labelledby="nwTitle">
+  <div class="sheet">
+    <h2 class="title" id="nwTitle">Start a new game?</h2>
+    <p class="muted">The current scores will be cleared.</p>
+    <button type="button" class="btn gold" id="nwSame">Same players and limit</button>
+    <button type="button" class="btn" id="nwNew">Change players or limit</button>
+    <button type="button" class="link center" id="nwCancel">Cancel</button>
+  </div>
+</dialog>
+
+<dialog id="dlgLog" aria-labelledby="lgTitle">
+  <div class="sheet">
+    <header class="head">
+      <h2 class="title" id="lgTitle">Voice log</h2>
+      <button type="button" class="x" id="lgClose" aria-label="Close">&times;</button>
+    </header>
+    <p class="muted">What happened on the last few mic taps. If voice isn't working, tap Copy and send it.</p>
+    <pre id="lgText" style="margin:0; white-space:pre-wrap; font-size:12px; color:#A1A1AA; max-height:50vh; overflow:auto; font-family:ui-monospace,Menlo,monospace"></pre>
+    <div class="two"><button type="button" class="btn" id="lgClear">Clear</button><button type="button" class="btn gold" id="lgCopy">Copy</button></div>
+  </div>
+</dialog>
+
+<div id="toast" popover="manual" role="status" aria-live="polite"></div>
+<noscript><p style="padding:20px">This app needs JavaScript.</p></noscript>
+
+<script>
+/*LOGIC_START*/
+const STOP = new Set(['and','the','is','has','got','scored','score','plus','ka','ki','ke','aur','hai']);
+const NUM = {};
+function norm(s) { return String(s).toLowerCase().normalize('NFC').replace(/[.,!?;:"“”'’()\-]/g, ' ').replace(/\s+/g, ' ').trim(); }
+function loose(s) { return norm(s).replace(/\s/g, '').replace(/(.)\1+/g, '$1').replace(/w/g, 'v').replace(/z/g, 'l'); }
+const add = (v, words) => words.forEach(w => { const k = norm(w); if (k && NUM[k] === undefined) NUM[k] = v; });
+
+const en = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+en.forEach((w, i) => add(i, [w]));
+const enT = {20:'twenty',30:'thirty',40:'forty',50:'fifty',60:'sixty',70:'seventy',80:'eighty',90:'ninety',100:'hundred'};
+Object.keys(enT).forEach(k => add(+k, [enT[k]]));
+add(100, ['one hundred']); add(0, ['nil','nothing','zeero']);
+// common mishearings of English numbers
+add(1, ['won','wan','van']); add(2, ['to','too','tu','tow']); add(3, ['tree','free','thee','tri','three']); add(4, ['for','fore','faar','chair']);
+add(5, ['fife','phive','fiv']); add(6, ['sicks','siks','sixe']); add(7, ['sevan','sevin']); add(8, ['ate','eit','ait','eat']); add(9, ['nein','nain','nyne']); add(10, ['tan','tenn']);
+// English numbers written in Hindi script (Hindi recogniser)
+add(1, ['वन']); add(2, ['टू','तू']); add(3, ['थ्री','त्री','ट्री']); add(4, ['फोर','फ़ोर']); add(5, ['फाइव','फ़ाइव','फाईव']); add(6, ['सिक्स']); add(7, ['सेवन']); add(8, ['एट','एइट','ऐट']); add(9, ['नाइन','नाईन']); add(10, ['टेन']);
+add(3, ['टीन']); add(4, ['चर']); add(8, ['आंठ']);
+// English numbers written in Tamil script (Tamil recogniser)
+add(1, ['ஒன்','வன்']); add(2, ['டூ']); add(3, ['த்ரீ','திரி']); add(4, ['ஃபோர்','போர்']); add(5, ['ஃபைவ்','பைவ்']); add(6, ['சிக்ஸ்']); add(7, ['செவன்']); add(8, ['எய்ட்','எயிட்']); add(9, ['நைன்']); add(10, ['டென்']);
+
+const hi = [
+  ['शून्य','shunya','zero','ज़ीरो','जीरो','ज़ीरो','सीरो'],['एक','ek'],['दो','do','doh'],['तीन','तिन','teen','tin'],['चार','char','chaar'],['पांच','पाँच','पाच','paanch','panch','paach'],['छह','छः','छे','छ','छै','चे','chhah','chhe','che','chha','chhai','chhey'],['सात','साथ','saat','sat'],['आठ','आट','aath','aat','ath'],['नौ','नव','nau','nao'],['दस','दश','das','dus'],
+  ['ग्यारह','gyarah','gyara'],['बारह','barah','bara'],['तेरह','terah','tera'],['चौदह','chaudah','chauda'],['पंद्रह','पन्द्रह','pandrah','pandra'],['सोलह','solah','sola'],['सत्रह','satrah','satra'],['अठारह','atharah','athara'],['उन्नीस','unnis'],['बीस','bees','bis'],
+  ['इक्कीस','ikkis'],['बाईस','bais'],['तेईस','teis'],['चौबीस','chaubis'],['पच्चीस','pachchis','pachis'],['छब्बीस','chhabbis'],['सत्ताईस','sattais'],['अट्ठाईस','अठाईस','atthais'],['उनतीस','untis'],['तीस','tees','tis'],
+  ['इकतीस','iktis'],['बत्तीस','battis'],['तैंतीस','taintis'],['चौंतीस','chauntis'],['पैंतीस','paintis'],['छत्तीस','chhattis'],['सैंतीस','saintis'],['अड़तीस','adtis'],['उनतालीस','untalis'],['चालीस','chalis'],
+  ['इकतालीस','iktalis'],['बयालीस','bayalis'],['तैंतालीस','taintalis'],['चवालीस','chavalis'],['पैंतालीस','paintalis'],['छियालीस','chhiyalis'],['सैंतालीस','saintalis'],['अड़तालीस','adtalis'],['उनचास','unchas'],['पचास','pachas'],
+  ['इक्यावन','ikyavan'],['बावन','bavan'],['तिरपन','tirpan'],['चौवन','chauvan'],['पचपन','pachpan'],['छप्पन','chhappan'],['सत्तावन','sattavan'],['अट्ठावन','atthavan'],['उनसठ','unsath'],['साठ','saath'],
+  ['इकसठ','iksath'],['बासठ','baasath'],['तिरसठ','tirsath'],['चौंसठ','chaunsath'],['पैंसठ','painsath'],['छियासठ','chhiyasath'],['सड़सठ','sadsath'],['अड़सठ','adsath'],['उनहत्तर','unhattar'],['सत्तर','sattar'],
+  ['इकहत्तर','ikhattar'],['बहत्तर','bahattar'],['तिहत्तर','tihattar'],['चौहत्तर','chauhattar'],['पचहत्तर','pachhattar'],['छिहत्तर','chhihattar'],['सतहत्तर','sathattar'],['अठहत्तर','athhattar'],['उन्यासी','unyasi'],['अस्सी','assi'],
+  ['इक्यासी','ikyasi'],['बयासी','bayasi'],['तिरासी','tirasi'],['चौरासी','chaurasi'],['पचासी','pachasi'],['छियासी','chhiyasi'],['सत्तासी','sattasi'],['अट्ठासी','atthasi'],['नवासी','navasi'],['नब्बे','nabbe'],
+  ['इक्यानवे','ikyanve'],['बानवे','baanve'],['तिरानवे','tiranve'],['चौरानवे','chauranve'],['पचानवे','pachanve'],['छियानवे','chhiyanve'],['सत्तानवे','sattanve'],['अट्ठानवे','atthanve'],['निन्यानवे','ninyanve'],['सौ','sau']
+];
+hi.forEach((words, i) => add(i, words));
+
+const ta = {
+  0: ['பூஜ்ஜியம்','பூஜ்யம்','poojiyam','zero'],
+  1: ['ஒன்று','ஒண்ணு','ஒன்னு','ondru','onnu','onu'],
+  2: ['இரண்டு','ரெண்டு','இரெண்டு','irandu','rendu','randu'],
+  3: ['மூன்று','மூணு','மூனு','moondru','moonu','munu'],
+  4: ['நான்கு','நாலு','naangu','naalu','nalu'],
+  5: ['ஐந்து','அஞ்சு','ainthu','aindhu','anju','anchu'],
+  6: ['ஆறு','aaru','aru'],
+  7: ['ஏழு','ezhu','elu','yelu','yezhu'],
+  8: ['எட்டு','ettu','yettu'],
+  9: ['ஒன்பது','onbathu','ombadhu','ombodhu','onbadhu'],
+  10: ['பத்து','pathu','paththu','padhu'],
+  11: ['பதினொன்று','பதினொண்ணு','pathinonnu','padhinonnu'],
+  12: ['பன்னிரண்டு','பன்னெண்டு','pannirandu','pannendu'],
+  13: ['பதின்மூன்று','பதிமூணு','pathimoonu','padhimoonu'],
+  14: ['பதினான்கு','பதினாலு','pathinaalu','padhinaalu'],
+  15: ['பதினைந்து','பதினஞ்சு','pathinanju','padhinanju'],
+  16: ['பதினாறு','pathinaaru','padhinaaru'],
+  17: ['பதினேழு','pathinezhu','padhinezhu'],
+  18: ['பதினெட்டு','pathinettu','padhinettu'],
+  19: ['பத்தொன்பது','paththonbathu','pathonbathu'],
+  20: ['இருபது','irupathu','irubadhu'],
+  30: ['முப்பது','muppathu','muppadhu'],
+  40: ['நாற்பது','naarpathu','narpadhu'],
+  50: ['ஐம்பது','அம்பது','aimbathu','aimbadhu','ambadhu','ambathu'],
+  60: ['அறுபது','arupathu','arubadhu'],
+  70: ['எழுபது','ezhupathu','ezhubadhu'],
+  80: ['எண்பது','enbathu','enbadhu'],
+  90: ['தொண்ணூறு','thonnooru','thonnuru'],
+  100: ['நூறு','nooru','nuru']
+};
+Object.keys(ta).forEach(k => add(+k, ta[k]));
+
+const TA_STEMS = [[20,'இருபத்'],[30,'முப்பத்'],[40,'நாற்பத்'],[50,'ஐம்பத்'],[60,'அறுபத்'],[70,'எழுபத்'],[80,'எண்பத்'],[90,'தொண்ணூற்'],
+                  [20,'irupath'],[20,'irubath'],[30,'muppath'],[40,'naarpath'],[50,'aimbath'],[60,'arupath'],[70,'ezhupath'],[80,'enbath'],[90,'thonnoot'],[90,'thonnut']];
+const TA_UNIT_ENDS = [[1,['தொன்று','தொண்ணு','தொன்னு','thonnu','thondru','tonnu']],[2,['திரண்டு','திரெண்டு','thirandu','thirendu','tirendu']],
+  [3,['திமூணு','துமூணு','thimoonu','thumoonu']],[4,['திநாலு','துநாலு','thinaalu','thunaalu']],[5,['தஞ்சு','தைந்து','thanju','thainthu']],
+  [6,['தாறு','thaaru']],[7,['தேழு','thezhu']],[8,['தெட்டு','thettu']],[9,['தொன்பது','thonbathu']]];
+
+const LOOSE_NUM = {};
+Object.keys(NUM).forEach(k => { if (/^[a-z ]+$/.test(k)) { const l = loose(k); if (LOOSE_NUM[l] === undefined) LOOSE_NUM[l] = NUM[k]; } });
+
+let custom = {};
+
+function wordToNum(tok) {
+  const t = norm(tok);
+  if (/^\d+$/.test(t)) return parseInt(t, 10);
+  if (custom[t] !== undefined) return custom[t];
+  if (NUM[t] !== undefined) return NUM[t];
+  const l = loose(t);
+  for (const k of Object.keys(custom)) if (loose(k) === l) return custom[k];
+  if (LOOSE_NUM[l] !== undefined) return LOOSE_NUM[l];
+  for (const [tens, stem] of TA_STEMS) {
+    if (t.startsWith(stem) && t.length > stem.length) {
+      const rest = t.slice(stem.length);
+      for (const [u, ends] of TA_UNIT_ENDS) if (ends.some(e => rest === e || rest.endsWith(e))) return tens + u;
+    }
+  }
+  return null;
+}
+
+let FUZZ = null;
+function fuzzyNum(tok) {
+  // Only for longer words, only when exactly one number is within 1-2 letters.
+  const key = loose(translit(norm(tok)));
+  if (key.length < 5 || /\d/.test(key)) return null;
+  if (!FUZZ) { FUZZ = []; Object.keys(NUM).forEach(k => { const kk = loose(translit(k)); if (kk.length >= 4) FUZZ.push([kk, NUM[k]]); }); }
+  const maxD = key.length >= 8 ? 2 : 1;
+  let best = Infinity, vals = new Set();
+  for (const [kk, v] of FUZZ) {
+    if (Math.abs(kk.length - key.length) > maxD) continue;
+    const d = lev(key, kk);
+    if (d < best) { best = d; vals = new Set([v]); } else if (d === best) vals.add(v);
+  }
+  return best <= maxD && vals.size === 1 ? [...vals][0] : null;
+}
+
+const DEV_C = {'क':'k','ख':'kh','ग':'g','घ':'gh','ङ':'n','च':'ch','छ':'chh','ज':'j','झ':'jh','ञ':'n','ट':'t','ठ':'th','ड':'d','ढ':'dh','ण':'n','त':'t','थ':'th','द':'d','ध':'dh','न':'n','प':'p','फ':'ph','ब':'b','भ':'bh','म':'m','य':'y','र':'r','ल':'l','व':'v','श':'sh','ष':'sh','स':'s','ह':'h','ळ':'l'};
+const DEV_V = {'अ':'a','आ':'a','इ':'i','ई':'i','उ':'u','ऊ':'u','ए':'e','ऐ':'ai','ओ':'o','औ':'au','ऋ':'ri'};
+const DEV_M = {'ा':'a','ि':'i','ी':'i','ु':'u','ू':'u','े':'e','ै':'ai','ो':'o','ौ':'au','ृ':'ri','ं':'n','ँ':'n','ः':'h'};
+const TA_C = {'க':'k','ங':'n','ச':'s','ஞ':'n','ட':'d','ண':'n','த':'th','ந':'n','ப':'p','ம':'m','ய':'y','ர':'r','ல':'l','வ':'v','ழ':'zh','ள':'l','ற':'r','ன':'n','ஜ':'j','ஷ':'sh','ஸ':'s','ஹ':'h'};
+const TA_V = {'அ':'a','ஆ':'a','இ':'i','ஈ':'i','உ':'u','ஊ':'u','எ':'e','ஏ':'e','ஐ':'ai','ஒ':'o','ஓ':'o','ஔ':'au'};
+const TA_M = {'ா':'a','ி':'i','ீ':'i','ு':'u','ூ':'u','ெ':'e','ே':'e','ை':'ai','ொ':'o','ோ':'o','ௌ':'au'};
+function translit(word) {
+  let out = '', pend = false;
+  for (const ch of word) {
+    if (ch === '़') continue;
+    const c = DEV_C[ch] || TA_C[ch];
+    if (c) { if (pend) out += 'a'; out += c; pend = true; continue; }
+    const m = DEV_M[ch] || TA_M[ch];
+    if (m) { out += m; pend = false; continue; }
+    if (ch === '्' || ch === '்') { pend = false; continue; }
+    const v = DEV_V[ch] || TA_V[ch];
+    if (v) { if (pend) out += 'a'; out += v; pend = false; continue; }
+    if (pend) { out += 'a'; pend = false; }
+    out += ch;
+  }
+  return out;
+}
+function lev(a, b) {
+  const m = a.length, n = b.length; if (!m) return n; if (!n) return m;
+  let prev = Array.from({length: n + 1}, (_, j) => j);
+  for (let i = 1; i <= m; i++) {
+    const cur = [i];
+    for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[n];
+}
+function matchPlayer(tok, players) {
+  const direct = players.find(p => norm(p) === norm(tok));
+  if (direct) return direct;
+  const t = loose(translit(norm(tok)).replace(/h/g, ''));
+  if (t.length < 2) return null;
+  let best = null, bestScore = 0;
+  for (const p of players) {
+    const k = loose(translit(norm(p)).replace(/h/g, ''));
+    const score = 1 - lev(t, k) / Math.max(t.length, k.length);
+    if (score > bestScore) { bestScore = score; best = p; }
+  }
+  return bestScore >= 0.6 ? best : null;
+}
+
+function parseSpeech(text, players) {
+  const toks = norm(text).split(' ').filter(Boolean);
+  const scores = {}; const unknown = []; const guessed = {};
+  let current = null;
+  for (let i = 0; i < toks.length; i++) {
+    let tok = toks[i];
+    const stuck = tok.match(/^(\D+)(\d+)$/);
+    if (stuck) { toks.splice(i, 1, stuck[1], stuck[2]); tok = toks[i]; }
+    let n = wordToNum(tok);
+    if (n !== null && i + 1 < toks.length) {
+      const two = wordToNum(tok + ' ' + toks[i + 1]);
+      if (two !== null) { n = two; i++; }
+      else if (n >= 20 && n % 10 === 0 && n < 100) {
+        const u = wordToNum(toks[i + 1]);
+        if (u !== null && u > 0 && u < 10) { n += u; i++; }
+      }
+    }
+    if (n !== null) {
+      if (current) { scores[current] = n; current = null; } else unknown.push(tok);
+      continue;
+    }
+    const p = matchPlayer(tok, players);
+    if (p) { current = p; continue; }
+    if (current) {
+      const f = fuzzyNum(tok);
+      if (f !== null) { scores[current] = f; guessed[current] = tok; current = null; continue; }
+    }
+    if (!STOP.has(tok)) unknown.push(tok);
+  }
+  return { scores, unknown, guessed };
+}
+
+function bestParse(alts, players) {
+  let best = null;
+  (alts.length ? alts : ['']).forEach((a, i) => {
+    const r = parseSpeech(a, players); r.text = a;
+    r.rank = Object.keys(r.scores).length * 10 - Object.keys(r.guessed).length * 3 - r.unknown.length - i * 0.1;
+    if (!best || r.rank > best.rank) best = r;
+  });
+  return best;
+}
+
+function compute(state) {
+  const totals = {}, bustedAt = {}, cells = [];
+  state.players.forEach(n => { totals[n] = 0; bustedAt[n] = null; });
+  state.rounds.forEach((round, r) => {
+    const row = {};
+    state.players.forEach(n => {
+      if (bustedAt[n] !== null) { row[n] = { v: null, counted: false }; return; }
+      const v = Number.isFinite(round[n]) ? round[n] : 0;
+      totals[n] += v; row[n] = { v, counted: true };
+      if (totals[n] > state.limit) bustedAt[n] = r;
+    });
+    cells.push(row);
+  });
+  const active = state.players.filter(n => bustedAt[n] === null);
+  const over = state.players.length >= 2 && state.rounds.length > 0 && active.length <= 1;
+  return { totals, bustedAt, cells, active, over };
+}
+/*LOGIC_END*/
+
+(function () {
+  const $ = id => document.getElementById(id);
+  const KEY = 'lc-game-v1', WORDS_KEY = 'lc-custom-words';
+  const LANGS = ['en-IN', 'hi-IN', 'ta-IN'];
+  const SHORT = { 'en-IN': 'EN', 'hi-IN': 'हिं', 'ta-IN': 'த' };
+  const ua = navigator.userAgent;
+  const IOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const STANDALONE = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  function el(tag, attrs, text) {
+    const e = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(k => e.setAttribute(k, attrs[k]));
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  // ---------- state ----------
+  let state = { limit: 100, players: [], rounds: [], lang: 'en-IN', started: false };
+  try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && Array.isArray(s.players) && Array.isArray(s.rounds)) state = Object.assign(state, s); } catch (e) {}
+  try { custom = JSON.parse(localStorage.getItem(WORDS_KEY) || '{}') || {}; } catch (e) { custom = {}; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function saveWords() { try { localStorage.setItem(WORDS_KEY, JSON.stringify(custom)); } catch (e) {} }
+
+  let setup = { limit: state.limit, players: state.players.slice() };
+  let redo = [];
+  let draft = { values: {}, heard: '', unknown: [] };
+  let L = null; // active listening session
+
+  // ---------- voice log ----------
+  const vlines = [];
+  function vlog(m) { vlines.push(m); if (vlines.length > 120) vlines.splice(0, vlines.length - 120); }
+  vlog('app v1.3 · ' + (IOS ? 'iPhone' : /Android/.test(ua) ? 'Android' : 'other') + ' · ' + (STANDALONE ? 'home-screen app' : 'browser') + ' · voice ' + (SR ? 'available' : 'missing'));
+
+  // ---------- toast ----------
+  let toastTimer = null;
+  function toast(msg, actionLabel, action) {
+    const t = $('toast'); t.innerHTML = '';
+    const pop = typeof t.showPopover === 'function';
+    t.append(el('span', null, msg));
+    const hide = () => { if (pop) { try { t.hidePopover(); } catch (e) {} } else t.style.display = 'none'; };
+    if (actionLabel) { const b = el('button', { type: 'button' }, actionLabel); b.addEventListener('click', () => { hide(); action(); }); t.append(b); }
+    if (pop) { try { t.hidePopover(); } catch (e) {} t.showPopover(); } else t.style.display = 'flex';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hide, actionLabel ? 6000 : 4200);
+  }
+
+  function notify(msg) {
+    if ($('dlgConfirm').open) { const st = $('cfStatus'); st.textContent = msg; st.hidden = false; }
+    else toast(msg);
+  }
+
+  // ---------- views ----------
+  function showView(name) {
+    $('viewSetup').hidden = name !== 'setup';
+    $('viewBoard').hidden = name !== 'board';
+    window.scrollTo(0, 0);
+    if (name === 'setup') renderSetup(); else renderBoard();
+  }
+
+  // ---------- setup ----------
+  function renderSetup() {
+    $('limitInput').value = setup.limit;
+    $('backToGame').hidden = !state.started;
+    const ul = $('playerList'); ul.innerHTML = '';
+    setup.players.forEach(n => {
+      const li = el('li', { class: 'prow' }); li.append(el('span', null, n));
+      const x = el('button', { type: 'button', class: 'x', 'aria-label': 'Remove ' + n }, '×');
+      x.addEventListener('click', () => { setup.players = setup.players.filter(p => p !== n); renderSetup(); });
+      li.append(x); ul.append(li);
+    });
+    $('playersLabel').textContent = 'Players · ' + setup.players.length;
+    document.querySelectorAll('.langs button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.lang === state.lang)));
+    $('langNote').textContent = (IOS && state.lang === 'ta-IN') ? 'Tamil voice typing isn’t available on iPhone. Pick English and say Tamil number words (like “moonu”), which may work, or type the scores.' : '';
+    $('startBtn').disabled = setup.players.length < 2;
+    $('installTip').hidden = !(IOS && !STANDALONE);
+    if (setup.players.length < 2) $('setupMsg').textContent = 'Add at least 2 players.'; else if ($('setupMsg').textContent === 'Add at least 2 players.') $('setupMsg').textContent = '';
+  }
+  function setLimit(v) { const n = Math.max(10, Math.min(9999, Math.round(v) || 100)); setup.limit = n; $('limitInput').value = n; }
+  $('limDown').addEventListener('click', () => setLimit(setup.limit - 10));
+  $('limUp').addEventListener('click', () => setLimit(setup.limit + 10));
+  $('limitInput').addEventListener('change', e => setLimit(parseInt(e.target.value, 10)));
+  $('addForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const name = $('nameInput').value.trim().replace(/\s+/g, ' ');
+    if (!name) return;
+    if (setup.players.length >= 8) { $('setupMsg').textContent = 'Up to 8 players.'; return; }
+    if (setup.players.some(p => p.toLowerCase() === name.toLowerCase())) { $('setupMsg').textContent = name + ' is already added.'; return; }
+    setup.players.push(name); $('nameInput').value = ''; $('setupMsg').textContent = ''; renderSetup(); $('nameInput').focus();
+  });
+  document.querySelectorAll('.langs button').forEach(b => b.addEventListener('click', () => { state.lang = b.dataset.lang; save(); renderSetup(); }));
+  $('startBtn').addEventListener('click', () => {
+    if (setup.players.length < 2) return;
+    setLimit(parseInt($('limitInput').value, 10));
+    state.limit = setup.limit; state.players = setup.players.slice(); state.rounds = []; state.started = true; redo = [];
+    save(); showView('board');
+  });
+  $('backToGame').addEventListener('click', () => showView('board'));
+
+  // ---------- board ----------
+  function renderBoard() {
+    const c = compute(state);
+    $('roundLabel').textContent = c.over ? 'Game over' : 'Round ' + (state.rounds.length + 1);
+    $('limitPill').textContent = 'Limit ' + state.limit;
+    $('langPill').textContent = SHORT[state.lang];
+    const ul = $('boardList'); ul.innerHTML = '';
+    state.players.forEach(n => {
+      const busted = c.bustedAt[n] !== null;
+      const li = el('li', { class: 'row' + (busted ? ' busted' : '') });
+      const info = el('div', { class: 'info' });
+      info.append(el('span', { class: 'pname' }, n));
+      info.append(busted ? el('span', { class: 'tag' }, 'BUSTED') : el('span', { class: 'note' }, Math.max(0, state.limit - c.totals[n]) + ' to go'));
+      li.append(info, el('span', { class: 'score' }, String(c.totals[n])));
+      ul.append(li);
+    });
+    const win = $('winBox');
+    if (c.over) {
+      win.hidden = false; win.innerHTML = '';
+      if (c.active.length === 1) { win.append(el('strong', null, c.active[0] + ' wins'), el('span', { class: 'muted' }, 'Everyone else crossed ' + state.limit + '.')); }
+      else {
+        const low = state.players.slice().sort((a, b) => c.totals[a] - c.totals[b])[0];
+        win.append(el('strong', null, 'Everyone is busted'), el('span', { class: 'muted' }, 'Lowest total: ' + low + ' (' + c.totals[low] + ')'));
+      }
+    } else win.hidden = true;
+    $('mic').classList.toggle('off', c.over);
+    $('micBtn').disabled = c.over; $('typeBtn').disabled = c.over;
+    $('undoBtn').disabled = state.rounds.length === 0;
+    if (!L) $('micText').textContent = c.over ? 'Game over' : (SR ? 'Tap to speak' : 'Voice not supported here');
+  }
+
+  $('langPill').addEventListener('click', () => {
+    state.lang = LANGS[(LANGS.indexOf(state.lang) + 1) % LANGS.length]; save(); renderBoard();
+    toast('Voice language: ' + ({ 'en-IN': 'English', 'hi-IN': 'हिंदी', 'ta-IN': 'தமிழ்' })[state.lang] + (IOS && state.lang === 'ta-IN' ? ' (not supported on iPhone)' : ''));
+  });
+  $('undoBtn').addEventListener('click', () => {
+    if (!state.rounds.length) { toast('Nothing to undo.'); return; }
+    const r = state.rounds.pop(); redo.push(r); save(); renderBoard();
+    toast('Round ' + (state.rounds.length + 1) + ' removed', 'Redo', () => { if (redo.length) { state.rounds.push(redo.pop()); save(); renderBoard(); } });
+  });
+  $('typeBtn').addEventListener('click', () => openConfirm(null));
+  $('historyBtn').addEventListener('click', () => { renderHistory(); $('dlgHistory').showModal(); });
+  $('teachBtn').addEventListener('click', () => openTeach(''));
+  $('newBtn').addEventListener('click', () => $('dlgNew').showModal());
+  $('nwCancel').addEventListener('click', () => $('dlgNew').close());
+  $('nwSame').addEventListener('click', () => { state.rounds = []; redo = []; save(); $('dlgNew').close(); renderBoard(); });
+  $('nwNew').addEventListener('click', () => { setup = { limit: state.limit, players: state.players.slice() }; $('dlgNew').close(); showView('setup'); });
+
+  // ---------- voice ----------
+  function setListening(on) {
+    $('mic').classList.toggle('on', on);
+    $('micBtn').setAttribute('aria-label', on ? 'Stop listening' : 'Start speaking scores');
+    $('micText').textContent = on ? 'Listening… tap to stop' : 'Tap to speak';
+    $('liveBox').hidden = !(on && L && L.source === 'board');
+    if (on) $('liveLabel').textContent = 'Starting mic…';
+    if (on && L && L.source === 'confirm') {
+      $('cfHeard').hidden = false; $('cfHeardText').textContent = 'Listening… say the player and the number';
+      $('cfUnknown').hidden = true; $('cfStatus').hidden = true; $('cfMsg').hidden = true;
+    }
+    $('cfSpeakText').textContent = on && L && L.source === 'confirm' ? 'Stop' : 'Speak again';
+    if (!on) $('liveText').textContent = '';
+  }
+  function explain(err) {
+    const m = {
+      'not-allowed': 'Voice is blocked. Allow the microphone and speech recognition for this site, and turn on Dictation in iPhone Settings > General > Keyboard.',
+      'service-not-allowed': 'Voice is blocked. On iPhone, turn on Dictation (Settings > General > Keyboard) and allow speech recognition.',
+      'language-not-supported': 'This phone can’t recognise that language by voice. Try English or type the scores.',
+      'network': 'Voice recognition needs an internet connection on this phone.',
+      'audio-capture': 'No microphone found.'
+    };
+    notify(m[err] || 'Voice stopped (' + err + '). Try again or type the scores.');
+  }
+  function startListening(source) {
+    if (!SR) { toast('Voice isn’t supported in this browser. Type the scores instead.'); return; }
+    if (L) { L.rec.stop(); return; }
+    let rec;
+    try { rec = new SR(); } catch (e) { toast('Voice isn’t available right now.'); return; }
+    rec.lang = state.lang; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 5;
+    L = { rec: rec, source: source, alts: [], text: '', error: null, cancel: false, t0: Date.now(), done: false };
+    const me = L;
+    vlog('tap: start ' + state.lang + (STANDALONE ? ' (home-screen app)' : ' (browser)'));
+    if (typeof rec.addEventListener === 'function') ['start','audiostart','soundstart','speechstart','speechend','soundend','audioend','nomatch'].forEach(n => rec.addEventListener(n, () => {
+      vlog('  +' + (Date.now() - me.t0) + 'ms ' + n);
+      if (n === 'audiostart' || n === 'start') $('liveLabel').textContent = 'Hearing…';
+    }));
+    me.watch = setTimeout(() => {
+      if (me.done) return;
+      vlog('  +' + (Date.now() - me.t0) + 'ms watchdog: stopping');
+      try { rec.stop(); } catch (e) {}
+      me.watch2 = setTimeout(() => { if (!me.done) { vlog('  watchdog: no end event, resetting'); try { rec.abort(); } catch (e) {} finish(me); } }, 2500);
+    }, 12000);
+    rec.onresult = e => {
+      let txt = '';
+      for (let i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript + ' ';
+      me.text = txt.trim();
+      const last = e.results[e.results.length - 1];
+      if (last.isFinal) {
+        const prefix = Array.from(e.results).slice(0, -1).map(r => r[0].transcript).join(' ');
+        me.alts = Array.from(last).map(a => (prefix + ' ' + a.transcript).trim());
+      }
+      $('liveText').textContent = me.text;
+      if (me.source === 'confirm') { $('cfHeard').hidden = false; $('cfHeardText').textContent = me.text; }
+    };
+    rec.onerror = e => { me.error = e.error; vlog('  +' + (Date.now() - me.t0) + 'ms error: ' + e.error); };
+    rec.onend = () => { vlog('  +' + (Date.now() - me.t0) + 'ms end' + (me.text ? ' · heard: ' + me.text : ' · nothing heard')); finish(me); };
+    try { rec.start(); setListening(true); } catch (e) { L = null; setListening(false); vlog('  start failed: ' + e.message); notify('Couldn’t start voice: ' + e.message); }
+  }
+  function finish(me) {
+      if (me.done) return; me.done = true;
+      clearTimeout(me.watch); clearTimeout(me.watch2);
+      if (L === me) L = null;
+      setListening(false);
+      if (me.cancel) return;
+      if (me.error && me.error !== 'no-speech' && me.error !== 'aborted') { explain(me.error); return; }
+      const alts = me.alts.length ? me.alts : (me.text ? [me.text] : []);
+      if (!alts.length) {
+        if (me.source === 'confirm') { $('cfHeard').hidden = !draft.heard; $('cfHeardText').textContent = draft.heard; }
+        notify(me.error === 'no-speech' ? 'Didn’t hear anything. Tap the mic and try again, or type the score.' : 'Didn’t catch that. Try again, or type the score.');
+        return;
+      }
+      openConfirm(bestParse(alts, compute(state).active));
+  }
+  function cancelListening() { if (L) { L.cancel = true; try { L.rec.abort(); } catch (e) {} } }
+  $('micBtn').addEventListener('click', () => startListening('board'));
+  if (!SR) $('micText').textContent = 'Voice not supported here';
+
+  // ---------- confirm ----------
+  function openConfirm(parsed) {
+    const dlg = $('dlgConfirm');
+    const active = compute(state).active;
+    if (!dlg.open) { draft = { values: {}, heard: '', unknown: [], guessed: {} }; active.forEach(n => { draft.values[n] = ''; }); }
+    const wasOpen = dlg.open;
+    if (parsed) {
+      Object.keys(parsed.scores).forEach(n => { draft.values[n] = String(parsed.scores[n]); if (parsed.guessed && parsed.guessed[n]) draft.guessed[n] = parsed.guessed[n]; else delete draft.guessed[n]; });
+      draft.heard = parsed.text; draft.unknown = parsed.unknown;
+    }
+    renderConfirm();
+    if (parsed) {
+      const got = Object.keys(parsed.scores);
+      const msg = got.length ? (wasOpen ? 'Updated: ' : 'Heard: ') + got.map(n => n + ' ' + parsed.scores[n] + (parsed.guessed && parsed.guessed[n] ? '?' : '')).join(', ')
+                             : 'No scores understood. Speak again slowly (“Rahul… eight”), or type them.';
+      $('cfStatus').textContent = msg; $('cfStatus').hidden = false;
+    }
+    if (!dlg.open) dlg.showModal();
+  }
+  function totalFor(name) {
+    const base = compute(state).totals[name] || 0;
+    const v = draft.values[name];
+    return v === '' || v === undefined ? base : base + parseInt(v, 10);
+  }
+  function renderConfirm() {
+    const c = compute(state);
+    $('cfRound').textContent = 'Round ' + (state.rounds.length + 1);
+    $('cfHeard').hidden = !draft.heard; $('cfHeardText').textContent = draft.heard;
+    const un = $('cfUnknown'); un.innerHTML = '';
+    if (draft.unknown.length) {
+      un.hidden = false; un.append(el('span', { class: 'muted' }, 'Not understood, tap to teach:'));
+      draft.unknown.slice(0, 6).forEach(w => { const b = el('button', { type: 'button', class: 'chip' }, w); b.addEventListener('click', () => openTeach(w)); un.append(b); });
+    } else un.hidden = true;
+    const ul = $('cfList'); ul.innerHTML = '';
+    c.active.forEach(n => {
+      const li = el('li', { class: 'crow' }); li.dataset.name = n;
+      const info = el('div', { class: 'info' }); info.append(el('span', { class: 'pname' }, n), el('span', { class: 'note' }, ''));
+      const lab = el('label', { class: 'sr', for: 'cf-' + n.replace(/\W/g, '_') }, 'Score this round for ' + n);
+      const inp = el('input', { id: 'cf-' + n.replace(/\W/g, '_'), type: 'text', inputmode: 'numeric', maxlength: '4', placeholder: '–', autocomplete: 'off' });
+      inp.value = draft.values[n] === '' ? '' : '+' + draft.values[n];
+      inp.addEventListener('input', () => { draft.values[n] = inp.value.replace(/\D/g, '').slice(0, 4); delete draft.guessed[n]; refreshRow(li, n); $('cfMsg').hidden = true; });
+      inp.addEventListener('focus', () => { inp.value = draft.values[n]; });
+      inp.addEventListener('blur', () => { inp.value = draft.values[n] === '' ? '' : '+' + draft.values[n]; });
+      const tot = el('span', { class: 'ctotal' }, '');
+      li.append(info, lab, inp, tot); ul.append(li); refreshRow(li, n);
+    });
+    $('cfMsg').hidden = true; $('cfStatus').hidden = true;
+  }
+  function refreshRow(li, n) {
+    const c = compute(state);
+    const v = draft.values[n];
+    const missing = v === '' || v === undefined;
+    const guess = !missing && draft.guessed && draft.guessed[n];
+    li.classList.toggle('missing', missing);
+    li.classList.toggle('guess', !!guess);
+    li.querySelector('.note').textContent = missing ? 'Not heard. Tap to add' : guess ? 'Guessed from “' + guess + '”. Check' : 'was ' + c.totals[n];
+    const t = totalFor(n);
+    const tot = li.querySelector('.ctotal'); tot.textContent = String(t); tot.classList.toggle('over', t > state.limit);
+  }
+  $('cfZero').addEventListener('click', () => { Object.keys(draft.values).forEach(n => { if (draft.values[n] === '') draft.values[n] = '0'; }); renderConfirm(); });
+  $('cfSpeak').addEventListener('click', () => startListening('confirm'));
+  $('cfClose').addEventListener('click', () => $('dlgConfirm').close());
+  $('dlgConfirm').addEventListener('close', cancelListening);
+  $('cfAdd').addEventListener('click', () => {
+    const before = compute(state);
+    const missing = before.active.filter(n => draft.values[n] === '' || draft.values[n] === undefined);
+    if (missing.length) {
+      $('cfMsg').textContent = 'Fill the highlighted scores, or tap “Set empty scores to 0”.'; $('cfMsg').hidden = false;
+      const first = $('cfList').querySelector('.crow.missing input'); if (first) first.focus();
+      return;
+    }
+    const round = {}; before.active.forEach(n => { round[n] = parseInt(draft.values[n], 10); });
+    state.rounds.push(round); redo = []; save();
+    $('dlgConfirm').close(); renderBoard();
+    const after = compute(state);
+    const newly = state.players.filter(n => before.bustedAt[n] === null && after.bustedAt[n] !== null);
+    if (newly.length) toast(newly.map(n => n + ' (' + after.totals[n] + ')').join(', ') + (newly.length > 1 ? ' are busted' : ' is busted'));
+  });
+
+  // ---------- history ----------
+  function renderHistory() {
+    const c = compute(state); const wrap = $('hsWrap'); wrap.innerHTML = '';
+    if (!state.rounds.length) { wrap.append(el('p', { class: 'muted', style: 'padding:14px' }, 'No rounds yet.')); return; }
+    const table = el('table'); const head = el('tr'); head.append(el('th', null, 'Player'));
+    state.rounds.forEach((_, r) => head.append(el('th', null, 'R' + (r + 1)))); head.append(el('th', null, 'Total'));
+    const thead = el('thead'); thead.append(head); table.append(thead);
+    const body = el('tbody');
+    state.players.forEach(n => {
+      const tr = el('tr'); tr.append(el('td', null, n));
+      state.rounds.forEach((_, r) => {
+        const cell = c.cells[r][n];
+        if (!cell.counted) { tr.append(el('td', { class: 'dash' }, '–')); return; }
+        const td = el('td'); const inp = el('input', { type: 'text', inputmode: 'numeric', maxlength: '4', 'aria-label': n + ' round ' + (r + 1) }); inp.value = String(cell.v);
+        inp.addEventListener('change', () => {
+          const v = parseInt(inp.value.replace(/\D/g, ''), 10);
+          if (!Number.isFinite(v)) { inp.value = String(cell.v); return; }
+          state.rounds[r][n] = v; save(); renderHistory(); renderBoard();
+        });
+        td.append(inp); tr.append(td);
+      });
+      tr.append(el('td', { class: 'tot' + (c.bustedAt[n] !== null ? ' over' : '') }, String(c.totals[n])));
+      body.append(tr);
+    });
+    table.append(body); wrap.append(table);
+  }
+  $('hsClose').addEventListener('click', () => $('dlgHistory').close());
+  $('logBtn').addEventListener('click', () => { $('lgText').textContent = vlines.join('\n'); $('dlgLog').showModal(); });
+  $('lgClose').addEventListener('click', () => $('dlgLog').close());
+  $('lgClear').addEventListener('click', () => { vlines.length = 0; $('lgText').textContent = ''; });
+  $('lgCopy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(vlines.join('\n')); toast('Copied. Paste it in the chat.'); } catch (e) { toast('Copy blocked. Select the text and copy it by hand.'); } });
+
+  // ---------- teach a word ----------
+  function openTeach(word) {
+    $('thWord').value = word || ''; $('thNum').value = ''; renderChips();
+    const dlg = $('dlgTeach'); if (!dlg.open) dlg.showModal();
+    (word ? $('thNum') : $('thWord')).focus();
+  }
+  function renderChips() {
+    const box = $('thChips'); box.innerHTML = '';
+    Object.keys(custom).forEach(w => {
+      const c = el('span', { class: 'chip static' }); c.append(el('span', null, w + ' = ' + custom[w]));
+      const x = el('button', { type: 'button', 'aria-label': 'Remove ' + w }, '×');
+      x.addEventListener('click', () => { delete custom[w]; saveWords(); renderChips(); });
+      c.append(x); box.append(c);
+    });
+  }
+  $('thForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const w = norm($('thWord').value), n = parseInt($('thNum').value, 10);
+    if (!w || !Number.isFinite(n)) return;
+    custom[w] = n; saveWords(); renderChips(); $('thWord').value = ''; $('thNum').value = '';
+    if ($('dlgConfirm').open && draft.heard) { const active = compute(state).active; const r = bestParse([draft.heard], active); Object.keys(r.scores).forEach(p => { if (draft.values[p] === '') draft.values[p] = String(r.scores[p]); }); draft.unknown = r.unknown; renderConfirm(); }
+    toast('Saved: ' + w + ' = ' + n);
+  });
+  $('thClose').addEventListener('click', () => $('dlgTeach').close());
+
+  // dialogs: tap the dark backdrop to close
+  document.querySelectorAll('dialog').forEach(d => d.addEventListener('click', e => { if (e.target === d) d.close(); }));
+
+  // ---------- start ----------
+  showView(state.started && state.players.length >= 2 ? 'board' : 'setup');
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    if (IOS) navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(() => {});
+    else navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+})();
+</script>
+</body>
+</html>
